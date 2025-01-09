@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
+
+/* Custom class for dark overlay */
+/* .bg-dark-overlay {
+    position: relative;
+}
+
+.bg-dark-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5); 
+    pointer-events: none; 
+} */
+
+/* .text-input-fill,
+.text-input-fill input {
+    -webkit-text-fill-color: #000;
+} */
+
+/* Tweet widget overrides */
+@layer components {
+    /* .tweet-override .tweet-container_root__0rJLq {
+        @apply max-w-5xl !important;
+    } */
+}
