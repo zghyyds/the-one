@@ -209,7 +209,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="relative h-[600px] w-full px-8">
+        <div className="relative h-[600px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData.prices}>
               <defs>
@@ -323,7 +323,7 @@ export default function Home() {
                   className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
                   style={{
                     left: `${xPercent}%`,
-                    top: `${100 - yPercent}%`,
+                    top: `${92 - yPercent}%`,
                   }}
                 >
                   <Image
