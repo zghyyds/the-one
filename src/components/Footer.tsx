@@ -9,7 +9,7 @@ export const Footer = () => {
     >
       <div className="max-w-[1536px] w-full mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="text-gray-400 text-sm">
-          © 2024 IXO Protocol. All rights reserved.
+          © 2024 The1. All rights reserved.
         </div>
         <div className="flex gap-6">
           <a href="#" className="text-gray-400 hover:text-white text-sm">
