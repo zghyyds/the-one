@@ -5,11 +5,12 @@ import {
   Area,
   XAxis,
   YAxis,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
 import { demoData } from "@/configs/demoData";
 import Image from "next/image";
+import { Tooltip } from "@nextui-org/react";
 
 type Granularity = "1H" | "1D" | "1W";
 type FollowerRange = "0-5k" | "5k-10k" | "10k-50k" | "50k+";
@@ -38,7 +39,6 @@ interface KolMarker {
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [hoveredKol, setHoveredKol] = useState<KolMarker | null>(null);
   const [granularity, setGranularity] = useState<Granularity>("1H");
   const [followerFilter, setFollowerFilter] = useState<FollowerRange[]>([]);
 
@@ -229,7 +229,7 @@ export default function Home() {
                 tick={{ fill: "#666" }}
                 tickLine={{ stroke: "#666" }}
               />
-              <Tooltip
+              <RechartsTooltip
                 contentStyle={{
                   backgroundColor: "#1a1a1a",
                   border: "1px solid #333",
@@ -248,7 +248,7 @@ export default function Home() {
             </AreaChart>
           </ResponsiveContainer>
 
-          {/* KOL Markers */}
+          {/* KOL Markers with NextUI Tooltip */}
           {chartData.kolMarkers.map((marker, index) => {
             const xPercent = (marker.x / chartData.prices.length) * 100;
             const yPercent =
@@ -258,17 +258,74 @@ export default function Home() {
               100;
 
             return (
-              <div
+              <Tooltip
                 key={index}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-50"
-                style={{
-                  left: `${xPercent}%`,
-                  top: `${100 - yPercent}%`,
-                }}
-                onMouseEnter={() => setHoveredKol(marker)}
-                onMouseLeave={() => setHoveredKol(null)}
+                showArrow
+                placement="top"
+                content={
+                  <div className="max-w-xs">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Image
+                        src={marker.data.profile_image_url}
+                        alt={marker.data.user}
+                        width={48}
+                        height={48}
+                        className="rounded-full"
+                      />
+                      <div>
+                        <h3 className="font-bold">{marker.data.user}</h3>
+                        <p className="text-sm text-gray-400">
+                          {marker.data.followers_count.toLocaleString()}{" "}
+                          followers
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-800 p-3 rounded-lg mb-3">
+                      {(() => {
+                        const shillPrice = marker.y;
+                        const currentPrice =
+                          chartData.prices[chartData.prices.length - 1].close;
+                        const priceChange =
+                          ((currentPrice - shillPrice) / shillPrice) * 100;
+                        const isProfit = priceChange > 0;
+
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <div className="text-sm text-gray-400">
+                              Price Impact
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono">
+                                ${shillPrice.toFixed(4)} → $
+                                {currentPrice.toFixed(4)}
+                              </span>
+                              <span
+                                className={`font-bold ${
+                                  isProfit ? "text-green-500" : "text-red-500"
+                                }`}
+                              >
+                                {isProfit ? "+" : ""}
+                                {priceChange.toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    <p className="text-sm">{marker.data.text}</p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {new Date(marker.data.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                }
               >
-                <div className="relative">
+                <div
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                  style={{
+                    left: `${xPercent}%`,
+                    top: `${100 - yPercent}%`,
+                  }}
+                >
                   <Image
                     src={marker.data.profile_image_url}
                     alt={marker.data.user}
@@ -277,77 +334,9 @@ export default function Home() {
                     className="rounded-full border-2 border-white hover:border-blue-500 transition-all"
                   />
                 </div>
-              </div>
+              </Tooltip>
             );
           })}
-
-          {/* Detailed KOL Info Popup */}
-          {hoveredKol && (
-            <div
-              className="absolute z-[60] bg-gray-900 p-4 rounded-lg shadow-lg max-w-md"
-              style={{
-                left: `${(hoveredKol.x / chartData.prices.length) * 100}%`,
-                top: `${
-                  100 -
-                  ((hoveredKol.y -
-                    Math.min(...chartData.prices.map((p) => p.close))) /
-                    (Math.max(...chartData.prices.map((p) => p.close)) -
-                      Math.min(...chartData.prices.map((p) => p.close)))) *
-                    100
-                }%`,
-                transform: "translate(-50%, -120%)",
-              }}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Image
-                  src={hoveredKol.data.profile_image_url}
-                  alt={hoveredKol.data.user}
-                  width={48}
-                  height={48}
-                  className="rounded-full"
-                />
-                <div>
-                  <h3 className="font-bold">{hoveredKol.data.user}</h3>
-                  <p className="text-sm text-gray-400">
-                    {hoveredKol.data.followers_count.toLocaleString()} followers
-                  </p>
-                </div>
-              </div>
-              <div className="bg-gray-800 p-3 rounded-lg mb-3">
-                {(() => {
-                  const shillPrice = hoveredKol.y;
-                  const currentPrice =
-                    chartData.prices[chartData.prices.length - 1].close;
-                  const priceChange =
-                    ((currentPrice - shillPrice) / shillPrice) * 100;
-                  const isProfit = priceChange > 0;
-
-                  return (
-                    <div className="flex flex-col gap-1">
-                      <div className="text-sm text-gray-400">Price Impact</div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono">
-                          ${shillPrice.toFixed(4)} → ${currentPrice.toFixed(4)}
-                        </span>
-                        <span
-                          className={`font-bold ${
-                            isProfit ? "text-green-500" : "text-red-500"
-                          }`}
-                        >
-                          {isProfit ? "+" : ""}
-                          {priceChange.toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-              <p className="text-sm mt-2">{hoveredKol.data.text}</p>
-              <p className="text-xs text-gray-400 mt-2">
-                {new Date(hoveredKol.data.created_at).toLocaleString()}
-              </p>
-            </div>
-          )}
         </div>
       </section>
     </div>
