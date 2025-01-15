@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['firebasestorage.googleapis.com', 'pbs.twimg.com'],
+        domains: [
+            'pbs.twimg.com',  // Twitter profile images
+            'abs.twimg.com',  // Twitter default images
+        ],
     },
+    reactStrictMode: true,
 }
 
 module.exports = nextConfig 
