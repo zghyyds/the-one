@@ -12,6 +12,7 @@ import { privyConfig } from "@/configs/privyConfig";
 import { wagmiConfig } from "@/configs/wagmiConfig";
 import { Toaster } from "sonner";
 
+
 export function Providers(props: {
   attribute: Attribute;
   defaultTheme: string;

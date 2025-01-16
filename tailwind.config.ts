@@ -15,6 +15,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: "#0FA711",
+        customblue: '#8181E5',
       },
       fontFamily: {
         manrope: ["var(--font-manrope)"],

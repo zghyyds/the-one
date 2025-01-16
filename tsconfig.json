@@ -13,6 +13,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "noUnusedLocals": false,    // 允许未使用的局部变量
+    "noUnusedParameters": false, // 允许未使用的参数
     "plugins": [
       {
         "name": "next"

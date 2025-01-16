@@ -14,6 +14,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useAccount, useBalance } from "wagmi";
 import { formatEther } from "viem";
 
+import Image from "next/image";
+
 export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -34,7 +36,7 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
 
   return (
     <NextUINavbar
-      maxWidth="2xl"
+      maxWidth="full"
       position="sticky"
       className="py-2 font-clillax md:py-6"
       classNames={{
@@ -50,7 +52,13 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
             )}
             href="/"
           >
-            The1
+            <Image 
+             src={"/logo.svg"}
+             width={36}
+             height={36}
+             alt=""
+            >  
+            </Image>
           </NextLink>
         </NavbarBrand>
       </NavbarContent>
@@ -59,9 +67,9 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
         <div className="flex items-center space-x-2 sm:space-x-6">
           {isNotLoggedIn && (
             <Button
-              radius="none"
+              radius="full"
               variant="bordered"
-              className="bg-white text-black"
+              className="bg-transparent text-[#8181E5] border-[#8181E5] border"
               onPress={() => login()}
             >
               Login

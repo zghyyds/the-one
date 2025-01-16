@@ -31,9 +31,39 @@
     -webkit-text-fill-color: #000;
 } */
 
+
+
+
+* {
+    scrollbar-width: thin; 
+    scrollbar-color: #8181E5 transparent; 
+} 
+
+*::-webkit-scrollbar {
+    width: 5px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+    /* background-color: #000; */
+    border-radius: 6px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+
 /* Tweet widget overrides */
 @layer components {
     /* .tweet-override .tweet-container_root__0rJLq {
         @apply max-w-5xl !important;
     } */
+    
 }

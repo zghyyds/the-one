@@ -31,3 +31,36 @@ export interface ProjectData {
   description?: string;
   // Add other new fields as needed
 }
+
+
+export type Params = {
+  name: string;
+};
+
+export type Follower = {
+  common_count: number,
+  total_count: number
+}
+
+export type FollowTokens = {
+  first_created_at: string,
+  pair_name_1: string
+}
+
+export type ChartData = {
+  [key in FollowTokens["pair_name_1"]]: number | string;
+}
+
+
+export type TokenList = {
+  name: string,
+  address: string,
+  num: string
+}
+
+export type KolDetail = {
+  FollowerNum:number,
+  Following:string,
+  profile_image_url:string,
+  user:string
+}
