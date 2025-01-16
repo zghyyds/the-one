@@ -27,7 +27,12 @@ export const getColorByIndex = (index: number): string => {
 
 
 export const processHistory = (
-  history: any[],
+  history: Array<{
+    close: string;
+    download_time: string;
+    name: string;
+    volume: string;
+  }>,
   filterTime: string | undefined
 ): Record<string, number>[] => {
   const filteredHistory = history
