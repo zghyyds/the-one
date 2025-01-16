@@ -4,7 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
-import { Toaster } from 'react-hot-toast';import { Web3Provider } from "@/providers/Web3Provider";
+import { Toaster } from 'react-hot-toast';
+import { Web3Provider } from "@/providers/Web3Provider";
 
 export default function RootLayout({
   children,
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="min-h-screen font-manrope text-white antialiased">
         <Web3Provider>
           <Providers attribute="class" defaultTheme="dark">
+            <Toaster/>
             <div className="relative min-h-screen flex flex-col">
               {/* Scrollable content */}
               <div className="relative z-10 flex flex-col flex-1">
