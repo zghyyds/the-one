@@ -32,15 +32,14 @@ async function getTokenData(ticker: string) {
 export default async function TokenPage({
   params,
 }: {
-  params: { ticker: string };
+  params: Promise<{ ticker: string }>;
 }) {
-  const data = await getTokenData(params.ticker);
+  const ticker = (await params).ticker;
+  const data = await getTokenData(ticker);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">
-        ${params.ticker.toUpperCase()}
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">${ticker.toUpperCase()}</h1>
 
       <Suspense
         fallback={
