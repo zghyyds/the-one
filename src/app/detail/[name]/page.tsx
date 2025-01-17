@@ -1,13 +1,10 @@
 "use client"
 import { Chip } from "@nextui-org/chip";
 import {
-  AreaChart,
   LineChart,
   Line,
-  Area,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
@@ -47,11 +44,11 @@ export default function Detail() {
     getFollow()
     relationship()
     getFollowToken()
-  }, [])
+  }, [params.name])
 
   const getFollow = async () => {
     try {
-      let res = await getFollowNum(params.name)
+      const res = await getFollowNum(params.name)
       setFollowerList(res['following data'])
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "error");
@@ -61,7 +58,7 @@ export default function Detail() {
   const getFollowToken = async () => {
     try {
       setLoading(true)
-      let res = await getFollowTime(params.name)
+      const res = await getFollowTime(params.name)
       setFollowTokens(res.tweets)
       setXList(res.tweets.map(time => time.pair_name_1))
       fetchAllTokens(res.tweets)
@@ -74,8 +71,21 @@ export default function Detail() {
 
   const fetchAllTokens = async (followTokens: FollowTokens[]) => {
     if (followTokens?.length) {
-      const res = await Promise.all(followTokens.map(token => getTickerOne(token.pair_name_1)))
-      const list = res.map((item, index) => {
+      const res = await Promise.all(
+        followTokens.map(async (token) => {
+          try {
+            return await getTickerOne(token.pair_name_1);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "error");
+            return null
+          }
+        })
+      );
+  
+      // 过滤掉返回 null 的结果
+      const validRes = res.filter(item => item !== null);
+
+      const list = validRes.map((item, index) => {
         const filterTime = followTokens.filter((v) => v.pair_name_1 === item.ticker_name)[0]?.first_created_at;
         return processHistory(item.history, filterTime);
       });
@@ -88,7 +98,7 @@ export default function Detail() {
   const relationship = async () => {
     try {
       setLoadShip(true)
-      let res = await getFollowList(params.name)
+      const res = await getFollowList(params.name)
       const _data = res.tweets.filter(v => v.Following === params.name)[0] ?? {}
       setKolDetail(_data)
 
@@ -174,7 +184,7 @@ export default function Detail() {
         <div className="flex flex-col">
           <div className="flex gap-2">
             <span className="font-bold">KOL namename</span>
-            <Chip radius="sm" size="sm" style={{ backgroundColor: "#7574CB" }}>relevant tag</Chip>
+            {/* <Chip radius="sm" size="sm" style={{ backgroundColor: "#7574CB" }}>relevant tag</Chip> */}
           </div>
           <span className="text-sm">@{params.name}</span>
         </div>
@@ -187,13 +197,13 @@ export default function Detail() {
     <Divider></Divider>
     <div className="flex gap-4 " style={{ height: "750px" }} >
       <div style={{ width: "60%" }} className="flex flex-col gap-4 h-full">
-        <Card className="flex flex-col bg-[#1f1b23]" style={{ backgroundColor: "#1f1b23E1" }}>
-          <CardBody className="overflow-x-auto p-4">
+        <Card className="flex flex-col bg-[#1f1b23] p-2 px-4" style={{ backgroundColor: "#1f1b23E1" }}>
+          <CardBody className="overflow-x-auto p-2">
             <span className="font-bold">Token</span>
             <div className="flex gap-3" >
               {
                 followTokens?.map((token, index) =>
-                  <NextLink href={`/chart/${token.pair_name_1}`} key={index}>
+                  <NextLink href={`/token/${token.pair_name_1.toLowerCase()}`} key={index}>
                     <Button >
                       {token.pair_name_1}
                     </Button>
@@ -218,14 +228,20 @@ export default function Detail() {
                   }
                   <XAxis dataKey="download_time" stroke="#8c8c8c" tick={{ fill: "#8c8c8c" }}
                     tickLine={false} />
-                  <YAxis stroke="#8c8c8c" tick={{ fill: "#8c8c8c" }}
-                    tickLine={false} />
-                  <Tooltip contentStyle={{
+                  <YAxis
+                    stroke="#8c8c8c"
+                    tick={{ fill: "#8c8c8c" }}
+                    tickLine={false}
+                    tickFormatter={(value) => `${value}%`} // 格式化为百分比
+                  />
+                  {/* <Tooltip contentStyle={{
                     backgroundColor: "#312d4c",
                     border: "1px solid #333",
                     borderRadius: "8px",
                     color: "#fff",
-                  }} />
+                  }} /> */}
+                  
+                  <Tooltip content={<CustomTooltip />} />
                 </LineChart>
               </ResponsiveContainer>
             }
@@ -297,3 +313,30 @@ export default function Detail() {
     </div>
   </div>
 }
+
+
+const CustomTooltip = ({ payload, label }: any) => {
+  if (!payload || payload.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        backgroundColor: "#312d4c",
+        // border: "1px solid #333",
+        borderRadius: "8px",
+        color: "#fff",
+        padding: "10px",
+      }}
+    >
+      <p>{label}</p>
+      {payload.map((entry: any, index: number) => {
+        const value = entry.value;
+        return (
+          <p key={index}>
+            <strong>{entry.name}:</strong> {value}%
+          </p>
+        );
+      })}
+    </div>
+  );
+};

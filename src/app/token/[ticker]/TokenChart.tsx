@@ -10,29 +10,30 @@ import {
 } from "recharts";
 import Image from "next/image";
 import { Tooltip } from "@nextui-org/react";
-
+import { Tweet, PriceHistory } from "@/types"
 type Granularity = "1H" | "1D" | "1W";
 type FollowerRange = "0-5k" | "5k-10k" | "10k-50k" | "50k+";
+import NextLink from "next/link";
+import ImageError from "@/components/ImageError"
+// interface Tweet {
+//   created_at: string;
+//   followers_count: number;
+//   id: number;
+//   impact: number;
+//   pair_name_1: string;
+//   profile_image_url: string;
+//   screen_name: string;
+//   text: string;
+//   tweet_id: number;
+//   user: string;
+// }
 
-interface Tweet {
-  created_at: string;
-  followers_count: number;
-  id: number;
-  impact: number;
-  pair_name_1: string;
-  profile_image_url: string;
-  screen_name: string;
-  text: string;
-  tweet_id: number;
-  user: string;
-}
-
-interface PriceHistory {
-  close: string;
-  download_time: string;
-  name: string;
-  volume: string;
-}
+// interface PriceHistory {
+//   close: string;
+//   download_time: string;
+//   name: string;
+//   volume: string;
+// }
 
 export default function TokenChart({
   initialData,
@@ -107,6 +108,7 @@ export default function TokenChart({
     data: tweet,
   }));
 
+
   const formatTime = (date: Date, gran: Granularity) => {
     if (gran === "1H") {
       return date.toLocaleString([], {
@@ -122,6 +124,7 @@ export default function TokenChart({
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
   };
+
 
   return (
     <section className="mb-8">
@@ -152,11 +155,10 @@ export default function TokenChart({
                       : [...prev, range]
                   );
                 }}
-                className={`px-3 py-1 text-sm rounded ${
-                  followerRange.includes(range)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                }`}
+                className={`px-3 py-1 text-sm rounded ${followerRange.includes(range)
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
               >
                 {range}
               </button>
@@ -224,15 +226,9 @@ export default function TokenChart({
             <Tooltip
               key={index}
               content={
-                <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm text-white">
+                <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm text-white" >
                   <div className="flex items-center gap-3 p-3 border-b border-gray-800">
-                    <Image
-                      src={marker.data.profile_image_url}
-                      alt={marker.data.user}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
+                    <ImageError url={marker.data.profile_image_url} alt={marker.data.user}></ImageError>
                     <div>
                       <div className="flex flex-col">
                         <span className="font-bold text-white">
@@ -286,9 +282,8 @@ export default function TokenChart({
                                 Max Impact After Post
                               </span>
                               <span
-                                className={`font-mono font-bold ${
-                                  isProfit ? "text-green-500" : "text-red-500"
-                                }`}
+                                className={`font-mono font-bold ${isProfit ? "text-green-500" : "text-red-500"
+                                  }`}
                               >
                                 {isProfit ? "+" : ""}
                                 {priceChange.toFixed(2)}%
@@ -320,13 +315,16 @@ export default function TokenChart({
                   top: `${92 - yPercent}%`,
                 }}
               >
-                <Image
-                  src={marker.data.profile_image_url}
-                  alt={marker.data.user}
-                  width={32}
-                  height={32}
-                  className="rounded-full border-2 border-white hover:border-blue-500 transition-all"
-                />
+                <NextLink href={`/detail/${marker.data.screen_name}`}>
+                  <ImageError url={marker.data.profile_image_url} alt={marker.data.user}></ImageError>
+                  {/* <Image
+                    src={marker.data.profile_image_url}
+                    alt={marker.data.user}
+                    width={32}
+                    height={32}
+                    className="rounded-full border-2 border-white hover:border-blue-500 transition-all"
+                  /> */}
+                </NextLink>
               </div>
             </Tooltip>
           );

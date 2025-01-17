@@ -1,7 +1,7 @@
 import { manrope } from "@/configs/fonts";
 import clsx from "clsx";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+// import { Footer } from "@/components/Footer";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
 import { Toaster } from 'react-hot-toast';
@@ -26,7 +26,7 @@ export default function RootLayout({
                 <main className="flex-1 w-full mx-auto px-2 md:px-5 pb-8">
                   {children}
                 </main>
-                <Footer />
+                {/* <Footer /> */}
               </div>
             </div>
           </Providers>

@@ -56,7 +56,7 @@ export const processHistory = (
       [filteredHistory[filteredHistory.length - 1]?.name || "unknown"]: lastValidClose.toString(),
     });
   }
-
+  
   // 计算增长率
   return completedHistory.slice(0, 5).map((current, index, arr) => {
     const previous = arr[index - 1];
@@ -65,7 +65,7 @@ export const processHistory = (
     const previousValue = previous ? parseFloat(Object.values(previous)[0] as string) : currentValue;
 
     const growthRate = previous ? ((currentValue - previousValue) / previousValue) * 100 : 0;
-
+     
     return {
       [key]: parseFloat(growthRate.toFixed(2)),
     };

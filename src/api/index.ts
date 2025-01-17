@@ -35,6 +35,29 @@
   })
  }
 
+ export const getTweetOne = async (tickerName:string) =>{
+  return await request<{
+    ticker_name:string,
+    tweets:Array<{
+      created_at:string,
+      followers_count:number,
+      id:number,
+      impact:number,
+      pair_name_1:string,
+      profile_image_url:string,
+      screen_name:string,
+      text:string,
+      tweet_id:number,
+      user:string
+    }>
+  }>({
+    url:`/get-ticker-tweet?ticker_name=${tickerName}`,
+    method:'get'
+  })
+ }
+
+
+
  export const getKolOne = async (kolName:string) =>{
   return await request({
     url:`/get-following?kol_name=${kolName}`,

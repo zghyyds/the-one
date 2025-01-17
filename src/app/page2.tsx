@@ -26,7 +26,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const fetchTickers = async () => {
+    const fetchTickers = async () => { 
       try {
         const response = await fetch(
           "https://the1-target-asset-5lx7id43eq-uc.a.run.app/get-tickers"

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "modelcreator-cdd8f"
+  },
+  "targets": {
+    "modelcreator-cdd8f": {
+      "hosting": {
+        "prod": [
+          "the1agent"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -64,3 +64,23 @@ export type KolDetail = {
   profile_image_url:string,
   user:string
 }
+
+export interface Tweet {
+  created_at: string;
+  followers_count: number;
+  id: number;
+  impact: number;
+  pair_name_1: string;
+  profile_image_url: string;
+  screen_name: string;
+  text: string;
+  tweet_id: number;
+  user: string;
+}
+
+export interface PriceHistory {
+  close: string;
+  download_time: string;
+  name: string;
+  volume: string;
+}

@@ -33,21 +33,15 @@ export default function Home() {
     } else {
       // 否则调用 API 获取数据
       const getTickersApi = async () => {
-        let [kols, ticks] = await Promise.all([getKols(), getTickers()]);
+        const [kols, ticks] = await Promise.all([getKols(), getTickers()]);
         setKolsList(kols.tickers);
 
-        setTokenList(ticks.tickers.map(([name, address, num]) => ({
-          name,
-          address,
-          num,
-        })))
+        const filterList = Array.from(new Map(ticks.tickers.map(([name, address, num]) => [address, { name, address, num }])).values())
+
+        setTokenList(filterList)
         // 缓存到 localStorage
         localStorage.setItem("kolsList", JSON.stringify(kols.tickers));
-        localStorage.setItem("tokenList", JSON.stringify(ticks.tickers.map(([name, address, num]) => ({
-          name,
-          address,
-          num,
-        }))));
+        localStorage.setItem("tokenList", JSON.stringify(filterList));
       };
       getTickersApi();
     }
@@ -121,7 +115,7 @@ export default function Home() {
                       <div className="flex flex-col gap-2">
                         {
                           filteredTokens.length > 0 ? filteredTokens.map((item, index) => {
-                            return <NextLink href={`/chart/${item.name}`} key={index}>
+                            return <NextLink href={`/token/${item.name.toLowerCase()}`} key={index}>
                               <div className="flex gap-2 items-center">
                                 {/* <Image src={"/token.svg"} width={28} height={28} alt=""></Image> */}
                                   <span className="font-bold">{item.name}</span>
