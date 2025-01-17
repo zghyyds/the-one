@@ -107,6 +107,7 @@ export default function TokenChart({
     time: new Date(tweet.created_at),
     data: tweet,
   }));
+console.log(tweetMarkers,'tweetMarkers');
 
 
   const formatTime = (date: Date, gran: Granularity) => {
@@ -128,7 +129,7 @@ export default function TokenChart({
 
   return (
     <section className="mb-8">
-      <div className="flex flex-col gap-4 mb-4 sm:flex-row">
+      <div className="flex  gap-4 mb-4 sm:flex-row">
         <div className="flex flex-col gap-2">
           <label className="text-sm text-gray-400">Time Interval</label>
           <select
@@ -214,14 +215,16 @@ export default function TokenChart({
           const price = processedChartData.find(
             (d) => Math.abs(d.time.getTime() - markerTime) < 3600000
           )?.price;
-
+  
+          
           if (!price) return null;
 
           const minPrice = Math.min(...processedChartData.map((d) => d.price));
           const maxPrice = Math.max(...processedChartData.map((d) => d.price));
           const priceRange = maxPrice - minPrice;
           const yPercent = ((price - minPrice) / priceRange) * 100;
-
+          // console.log(yPercent,'yPercent');
+          
           return (
             <Tooltip
               key={index}
@@ -312,7 +315,7 @@ export default function TokenChart({
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
                 style={{
                   left: `${xPercent}%`,
-                  top: `${92 - yPercent}%`,
+                  top: `${100 - yPercent}%`,
                 }}
               >
                 <NextLink href={`/detail/${marker.data.screen_name}`}>

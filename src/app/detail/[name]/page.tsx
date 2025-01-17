@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Avatar, Divider } from "@nextui-org/react";
-// import { Image } from "@nextui-org/image";
+import { Image } from "@nextui-org/image";
 import toast from 'react-hot-toast';
 import ReactECharts from "echarts-for-react";
 import { getFollowNum, getFollowList, getFollowTime, getTickerOne } from "@/api"
@@ -39,6 +39,7 @@ export default function Detail() {
   const [loading, setLoading] = useState(false)
   const [loadship, setLoadShip] = useState(false)
   const [KolDetail, setKolDetail] = useState<KolDetail>()
+  const [tweetsList,setTweetsList] = useState<KolDetail[]>()
 
   useEffect(() => {
     getFollow()
@@ -99,8 +100,11 @@ export default function Detail() {
     try {
       setLoadShip(true)
       const res = await getFollowList(params.name)
+      setTweetsList(res.tweets)
       const _data = res.tweets.filter(v => v.Following === params.name)[0] ?? {}
-      setKolDetail(_data)
+      // console.log(_data);
+      
+      // setKolDetail(_data)
 
       const nodes = res.tweets
 
@@ -136,6 +140,15 @@ export default function Detail() {
       setLoadShip(false)
     }
   }
+
+  useEffect(()=>{
+    if(tweetsList?.length){
+      const _data = tweetsList.filter(v => v.Following === params.name)[0] ?? {}
+      console.log(_data);
+      
+      setKolDetail(_data)
+    }
+  },[tweetsList])
 
   useEffect(() => {
     setOption({
@@ -180,10 +193,11 @@ export default function Detail() {
   return <div className="flex flex-col gap-4">
     <div className="flex justify-between items-center mb-3">
       <div className="flex items-center gap-2">
-        <Avatar size="lg" src={KolDetail?.profile_image_url} ></Avatar>
+        <Avatar size="lg" src={KolDetail?.profile_image_url}  ></Avatar>
+        {/* <Image src={KolDetail?.profile_image_url}  ></Image> */}
         <div className="flex flex-col">
           <div className="flex gap-2">
-            <span className="font-bold">KOL namename</span>
+            <span className="font-bold">{KolDetail?.user}</span>
             {/* <Chip radius="sm" size="sm" style={{ backgroundColor: "#7574CB" }}>relevant tag</Chip> */}
           </div>
           <span className="text-sm">@{params.name}</span>
