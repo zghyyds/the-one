@@ -7,120 +7,290 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
+  ReferenceDot,
+  Brush,
 } from "recharts";
-import { Tooltip } from "@nextui-org/react";
+import { Tooltip, Avatar, AvatarGroup } from "@nextui-org/react";
 import { Tweet, PriceHistory } from "@/types";
 import NextLink from "next/link";
-import ImageError from "@/components/ImageError";
 
-type Granularity = "1H" | "1D" | "1W";
 type FollowerRange = "0-5k" | "5k-10k" | "10k-50k" | "50k+";
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-3">
+        <p className="text-gray-400 mb-2">
+          {new Date(label).toLocaleString([], {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            hour12: false,
+          })}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400">Price:</span>
+          <span className="text-white font-mono">
+            ${Number(payload[0].value).toFixed(4)}
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+interface CustomDotProps {
+  cx: number;
+  cy: number;
+  payload?: any;
+  tweets: Tweet[];
+  price: number;
+  chartData: Array<{
+    time: Date;
+    price: number;
+  }>;
+}
+
+const CustomDot = ({
+  cx,
+  cy,
+  payload,
+  tweets,
+  price,
+  chartData,
+}: CustomDotProps) => {
+  if (!tweets?.length) return null;
+
+  const calculateImpact = (tweet: Tweet, currentPrice: number) => {
+    // Find highest price after the tweet
+    const tweetTime = new Date(tweet.created_at).getTime();
+    const laterPrices = chartData.filter(
+      (d: any) => new Date(d.time).getTime() > tweetTime
+    );
+
+    if (laterPrices.length === 0) return null;
+
+    const highestPrice = Math.max(...laterPrices.map((d: any) => d.price));
+    const priceChange = ((highestPrice - currentPrice) / currentPrice) * 100;
+
+    return {
+      highestPrice,
+      priceChange,
+    };
+  };
+
+  return (
+    <foreignObject
+      x={cx - 12}
+      y={cy - 12}
+      width={24}
+      height={24}
+      style={{ overflow: "visible" }}
+    >
+      <Tooltip
+        content={
+          <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm">
+            {tweets.map((tweet: Tweet, i) => {
+              const impact = calculateImpact(tweet, price);
+              return (
+                <div
+                  key={i}
+                  className={`p-3 ${
+                    i !== tweets.length - 1 ? "border-b border-gray-800" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <NextLink
+                        href={`https://twitter.com/${tweet.screen_name}`}
+                        target="_blank"
+                      >
+                        <Avatar
+                          src={tweet.profile_image_url}
+                          className="w-8 h-8 cursor-pointer hover:opacity-80"
+                        />
+                      </NextLink>
+                      <div>
+                        <NextLink
+                          href={`https://twitter.com/${tweet.screen_name}`}
+                          target="_blank"
+                          className="hover:underline"
+                        >
+                          <div className="font-bold text-white">
+                            {tweet.user}
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            @{tweet.screen_name} ·{" "}
+                            {tweet.followers_count.toLocaleString()} followers
+                          </div>
+                        </NextLink>
+                      </div>
+                    </div>
+                    <NextLink
+                      href={`https://twitter.com/intent/follow?screen_name=${tweet.screen_name}`}
+                      target="_blank"
+                      className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors"
+                    >
+                      Follow
+                    </NextLink>
+                  </div>
+
+                  <div className="mt-2 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Price at Post</span>
+                      <span className="font-mono">${price.toFixed(4)}</span>
+                    </div>
+                    {impact && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Highest After</span>
+                          <span className="font-mono">
+                            ${impact.highestPrice.toFixed(4)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Impact</span>
+                          <span
+                            className={`font-mono font-bold ${
+                              impact.priceChange >= 0
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {impact.priceChange >= 0 ? "+" : ""}
+                            {impact.priceChange.toFixed(2)}%
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <p className="mt-2 text-sm text-gray-300">{tweet.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        }
+        classNames={{
+          base: "shadow-xl rounded-lg",
+          content: "p-0",
+        }}
+      >
+        <div className="relative flex items-center scale-75">
+          {tweets.length > 1 ? (
+            <AvatarGroup isBordered max={10} size="sm" className="!gap-1">
+              {tweets.map((tweet: Tweet, i: number) => (
+                <NextLink
+                  key={i}
+                  href={`https://twitter.com/${tweet.screen_name}`}
+                  target="_blank"
+                >
+                  <Avatar
+                    src={tweet.profile_image_url}
+                    className="w-5 h-5 hover:border-blue-500 hover:z-50 cursor-pointer"
+                    classNames={{
+                      base: "!w-5 !h-5",
+                      icon: "!w-5 !h-5",
+                      img: "!w-5 !h-5",
+                    }}
+                  />
+                </NextLink>
+              ))}
+            </AvatarGroup>
+          ) : (
+            <NextLink
+              href={`https://twitter.com/${tweets[0].screen_name}`}
+              target="_blank"
+            >
+              <Avatar
+                src={tweets[0].profile_image_url}
+                className="w-5 h-5 border border-gray-800 hover:border-blue-500 transition-all cursor-pointer"
+                classNames={{
+                  base: "!w-5 !h-5",
+                }}
+              />
+            </NextLink>
+          )}
+        </div>
+      </Tooltip>
+    </foreignObject>
+  );
+};
+
 export default function TokenChart({
   initialData,
 }: {
   initialData: { priceHistory: PriceHistory[]; tweets: Tweet[] };
 }) {
-  const [granularity, setGranularity] = useState<Granularity>("1H");
   const [followerRange, setFollowerRange] = useState<FollowerRange[]>([]);
 
+  // Process chart data
   const processedChartData = useMemo(() => {
-    let data = [...initialData.priceHistory];
-
-    if (granularity !== "1H") {
-      const groupedData = new Map<string, number[]>();
-
-      data.forEach((item) => {
-        const date = new Date(item.download_time);
-        let key: string;
-
-        if (granularity === "1D") {
-          key = date.toISOString().split("T")[0]; // Group by day
-        } else {
-          // 1W - Group by week
-          const startOfWeek = new Date(date);
-          startOfWeek.setDate(date.getDate() - date.getDay());
-          key = startOfWeek.toISOString().split("T")[0];
-        }
-
-        if (!groupedData.has(key)) {
-          groupedData.set(key, []);
-        }
-        groupedData.get(key)?.push(parseFloat(item.close));
-      });
-
-      // Calculate average price for each period
-      data = Array.from(groupedData.entries()).map(([time, prices]) => ({
-        download_time: time,
-        close: (prices.reduce((a, b) => a + b, 0) / prices.length).toString(),
-        name: initialData.priceHistory[0].name,
-        volume: "0", // Volume not used in display
-      }));
-    }
-
-    return data.map((item) => ({
+    return initialData.priceHistory.map((item) => ({
       time: new Date(item.download_time),
       price: parseFloat(item.close),
-      volume: parseFloat(item.volume),
     }));
-  }, [initialData.priceHistory, granularity]);
+  }, [initialData.priceHistory]);
 
-  const filteredTweets = initialData.tweets.filter((tweet) => {
-    if (followerRange.length === 0) return true;
-    const followers = tweet.followers_count;
-    return followerRange.some((range) => {
-      switch (range) {
-        case "0-5k":
-          return followers < 5000;
-        case "5k-10k":
-          return followers >= 5000 && followers < 10000;
-        case "10k-50k":
-          return followers >= 10000 && followers < 50000;
-        case "50k+":
-          return followers >= 50000;
-        default:
-          return false;
+  // Process tweet data and match with prices
+  const tweetMarkers = useMemo(() => {
+    const markers: { time: Date; price: number; tweets: Tweet[] }[] = [];
+
+    initialData.tweets.forEach((tweet) => {
+      const tweetTime = new Date(tweet.created_at);
+
+      // Find the closest price data point within 1 hour
+      const closestPricePoint = processedChartData.find((pricePoint) => {
+        const timeDiff = Math.abs(
+          pricePoint.time.getTime() - tweetTime.getTime()
+        );
+        return timeDiff <= 3600000; // Within 1 hour (3600000 ms)
+      });
+
+      // Skip if no matching price point found
+      if (!closestPricePoint) {
+        console.log(`Tweet at ${tweetTime} skipped - no matching price data`);
+        return;
+      }
+
+      // Group tweets that share the same closest price point
+      const existingMarker = markers.find(
+        (m) => m.time.getTime() === closestPricePoint.time.getTime()
+      );
+
+      if (existingMarker) {
+        existingMarker.tweets.push(tweet);
+      } else {
+        markers.push({
+          time: closestPricePoint.time,
+          price: closestPricePoint.price,
+          tweets: [tweet],
+        });
       }
     });
-  });
 
-  const tweetMarkers = filteredTweets.map((tweet) => ({
-    time: new Date(tweet.created_at),
-    data: tweet,
-  }));
-  console.log(tweetMarkers, "tweetMarkers");
+    return markers;
+  }, [initialData.tweets, processedChartData]);
 
-  const formatTime = (date: Date, gran: Granularity) => {
-    if (gran === "1H") {
-      return date.toLocaleString([], {
-        month: "numeric",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        hour12: false,
-      });
-    } else if (gran === "1D") {
-      return date.toLocaleDateString([], { month: "short", day: "numeric" });
-    } else {
-      return date.toLocaleDateString([], { month: "short", day: "numeric" });
-    }
+  const formatTime = (date: Date) => {
+    return date.toLocaleString([], {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    });
   };
 
+  console.log("tweetMarkers", tweetMarkers);
+  console.log("processedChartData", processedChartData);
+  console.log(processedChartData[0]?.time.getTime());
+  console.log(tweetMarkers[0]?.time.getTime());
   return (
     <section className="mb-8">
-      <div className="flex  gap-4 mb-4 sm:flex-row">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm text-gray-400">Time Interval</label>
-          <select
-            value={granularity}
-            onChange={(e) => setGranularity(e.target.value as Granularity)}
-            className="bg-gray-800 text-white border border-gray-700 rounded p-2"
-          >
-            <option value="1H">1 Hour</option>
-            <option value="1D">1 Day</option>
-            <option value="1W">1 Week</option>
-          </select>
-        </div>
-
+      <div className="flex gap-4 mb-4 sm:flex-row">
         <div className="flex flex-col gap-2">
           <label className="text-sm text-gray-400">Filter by Followers</label>
           <div className="flex gap-2 flex-wrap">
@@ -158,19 +328,12 @@ export default function TokenChart({
             </defs>
             <XAxis
               dataKey="time"
-              tickFormatter={(time) => formatTime(time, granularity)}
+              tickFormatter={formatTime}
               stroke="#666"
               tick={{ fill: "#666" }}
             />
             <YAxis stroke="#666" tick={{ fill: "#666" }} />
-            <RechartsTooltip
-              contentStyle={{
-                backgroundColor: "#1a1a1a",
-                border: "1px solid #333",
-                borderRadius: "8px",
-                color: "#fff",
-              }}
-            />
+            <RechartsTooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
               dataKey="price"
@@ -178,138 +341,41 @@ export default function TokenChart({
               fillOpacity={1}
               fill="url(#colorPrice)"
             />
+            {tweetMarkers.map((marker, index) => (
+              <ReferenceDot
+                key={index}
+                x={marker.time.getTime()}
+                y={marker.price}
+                r={0}
+                shape={(props) => (
+                  <CustomDot
+                    {...props}
+                    tweets={marker.tweets}
+                    price={marker.price}
+                    chartData={processedChartData}
+                  />
+                )}
+              />
+            ))}
+            <Brush
+              dataKey="time"
+              height={30}
+              stroke="#8884d8"
+              fill="#1f1f1f"
+              tickFormatter={formatTime}
+            >
+              <AreaChart>
+                <Area
+                  type="monotone"
+                  dataKey="price"
+                  stroke="#8884d8"
+                  fill="#8884d8"
+                  fillOpacity={0.3}
+                />
+              </AreaChart>
+            </Brush>
           </AreaChart>
         </ResponsiveContainer>
-
-        {tweetMarkers.map((marker, index) => {
-          if (!processedChartData.length) return null;
-
-          const markerTime = marker.time.getTime();
-          const firstTime = processedChartData[0].time.getTime();
-          const lastTime =
-            processedChartData[processedChartData.length - 1].time.getTime();
-          const timeRange = lastTime - firstTime;
-          const xPercent = ((markerTime - firstTime) / timeRange) * 100;
-
-          const price = processedChartData.find(
-            (d) => Math.abs(d.time.getTime() - markerTime) < 3600000
-          )?.price;
-
-          if (!price) return null;
-
-          const minPrice = Math.min(...processedChartData.map((d) => d.price));
-          const maxPrice = Math.max(...processedChartData.map((d) => d.price));
-          const priceRange = maxPrice - minPrice;
-          const yPercent = ((price - minPrice) / priceRange) * 100;
-          // console.log(yPercent,'yPercent');
-
-          return (
-            <Tooltip
-              key={index}
-              content={
-                <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm text-white">
-                  <div className="flex items-center gap-3 p-3 border-b border-gray-800">
-                    <ImageError
-                      url={marker.data.profile_image_url}
-                      alt={marker.data.user}
-                    ></ImageError>
-                    <div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-white">
-                          {marker.data.user}
-                        </span>
-                        <span className="text-sm text-gray-400">
-                          @{marker.data.screen_name} ·{" "}
-                          {marker.data.followers_count.toLocaleString()}{" "}
-                          followers
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="px-3 py-2 border-b border-gray-800">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">
-                          Price at Post
-                        </span>
-                        <span className="font-mono text-white">
-                          ${price.toFixed(4)}
-                        </span>
-                      </div>
-                      {(() => {
-                        // Find highest price after the post
-                        const laterPrices = processedChartData.filter(
-                          (d) => d.time.getTime() > markerTime
-                        );
-                        if (laterPrices.length === 0) return null;
-
-                        const highestPrice = Math.max(
-                          ...laterPrices.map((d) => d.price)
-                        );
-                        const priceChange =
-                          ((highestPrice - price) / price) * 100;
-                        const isProfit = priceChange > 0;
-
-                        return (
-                          <>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-400">
-                                Highest After
-                              </span>
-                              <span className="font-mono text-white">
-                                ${highestPrice.toFixed(4)}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-400">
-                                Max Impact After Post
-                              </span>
-                              <span
-                                className={`font-mono font-bold ${
-                                  isProfit ? "text-green-500" : "text-red-500"
-                                }`}
-                              >
-                                {isProfit ? "+" : ""}
-                                {priceChange.toFixed(2)}%
-                              </span>
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-
-                  <div className="p-3">
-                    <p className="text-sm text-gray-300">{marker.data.text}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      {new Date(marker.data.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              }
-              classNames={{
-                base: "shadow-xl rounded-lg bg-gray-900",
-                arrow: "bg-gray-900",
-              }}
-            >
-              <div
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-                style={{
-                  left: `${xPercent}%`,
-                  top: `${100 - yPercent}%`,
-                }}
-              >
-                <NextLink href={`/detail/${marker.data.screen_name}`}>
-                  <ImageError
-                    url={marker.data.profile_image_url}
-                    alt={marker.data.user}
-                  ></ImageError>
-                </NextLink>
-              </div>
-            </Tooltip>
-          );
-        })}
       </div>
     </section>
   );
