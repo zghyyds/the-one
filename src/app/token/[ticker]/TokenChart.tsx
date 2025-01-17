@@ -219,6 +219,14 @@ const CustomDot = ({
   );
 };
 
+// Add helper function to check follower range
+const getFollowerRange = (followersCount: number): FollowerRange => {
+  if (followersCount < 5000) return "0-5k";
+  if (followersCount < 10000) return "5k-10k";
+  if (followersCount < 50000) return "10k-50k";
+  return "50k+";
+};
+
 export default function TokenChart({
   initialData,
 }: {
@@ -238,7 +246,15 @@ export default function TokenChart({
   const tweetMarkers = useMemo(() => {
     const markers: { time: Date; price: number; tweets: Tweet[] }[] = [];
 
-    initialData.tweets.forEach((tweet) => {
+    // Filter tweets based on selected follower ranges
+    const filteredTweets =
+      followerRange.length > 0
+        ? initialData.tweets.filter((tweet) =>
+            followerRange.includes(getFollowerRange(tweet.followers_count))
+          )
+        : initialData.tweets;
+
+    filteredTweets.forEach((tweet) => {
       const tweetTime = new Date(tweet.created_at);
 
       // Find the closest price data point within 1 hour
@@ -272,7 +288,7 @@ export default function TokenChart({
     });
 
     return markers;
-  }, [initialData.tweets, processedChartData]);
+  }, [initialData.tweets, processedChartData, followerRange]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleString([], {
