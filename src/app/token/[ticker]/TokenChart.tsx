@@ -8,33 +8,13 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import Image from "next/image";
 import { Tooltip } from "@nextui-org/react";
-import { Tweet, PriceHistory } from "@/types"
+import { Tweet, PriceHistory } from "@/types";
+import NextLink from "next/link";
+import ImageError from "@/components/ImageError";
+
 type Granularity = "1H" | "1D" | "1W";
 type FollowerRange = "0-5k" | "5k-10k" | "10k-50k" | "50k+";
-import NextLink from "next/link";
-import ImageError from "@/components/ImageError"
-// interface Tweet {
-//   created_at: string;
-//   followers_count: number;
-//   id: number;
-//   impact: number;
-//   pair_name_1: string;
-//   profile_image_url: string;
-//   screen_name: string;
-//   text: string;
-//   tweet_id: number;
-//   user: string;
-// }
-
-// interface PriceHistory {
-//   close: string;
-//   download_time: string;
-//   name: string;
-//   volume: string;
-// }
-
 export default function TokenChart({
   initialData,
 }: {
@@ -107,8 +87,7 @@ export default function TokenChart({
     time: new Date(tweet.created_at),
     data: tweet,
   }));
-console.log(tweetMarkers,'tweetMarkers');
-
+  console.log(tweetMarkers, "tweetMarkers");
 
   const formatTime = (date: Date, gran: Granularity) => {
     if (gran === "1H") {
@@ -125,7 +104,6 @@ console.log(tweetMarkers,'tweetMarkers');
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
   };
-
 
   return (
     <section className="mb-8">
@@ -156,10 +134,11 @@ console.log(tweetMarkers,'tweetMarkers');
                       : [...prev, range]
                   );
                 }}
-                className={`px-3 py-1 text-sm rounded ${followerRange.includes(range)
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+                className={`px-3 py-1 text-sm rounded ${
+                  followerRange.includes(range)
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
               >
                 {range}
               </button>
@@ -215,8 +194,7 @@ console.log(tweetMarkers,'tweetMarkers');
           const price = processedChartData.find(
             (d) => Math.abs(d.time.getTime() - markerTime) < 3600000
           )?.price;
-  
-          
+
           if (!price) return null;
 
           const minPrice = Math.min(...processedChartData.map((d) => d.price));
@@ -224,14 +202,17 @@ console.log(tweetMarkers,'tweetMarkers');
           const priceRange = maxPrice - minPrice;
           const yPercent = ((price - minPrice) / priceRange) * 100;
           // console.log(yPercent,'yPercent');
-          
+
           return (
             <Tooltip
               key={index}
               content={
-                <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm text-white" >
+                <div className="bg-gray-900 rounded-lg shadow-lg max-w-sm text-white">
                   <div className="flex items-center gap-3 p-3 border-b border-gray-800">
-                    <ImageError url={marker.data.profile_image_url} alt={marker.data.user}></ImageError>
+                    <ImageError
+                      url={marker.data.profile_image_url}
+                      alt={marker.data.user}
+                    ></ImageError>
                     <div>
                       <div className="flex flex-col">
                         <span className="font-bold text-white">
@@ -285,8 +266,9 @@ console.log(tweetMarkers,'tweetMarkers');
                                 Max Impact After Post
                               </span>
                               <span
-                                className={`font-mono font-bold ${isProfit ? "text-green-500" : "text-red-500"
-                                  }`}
+                                className={`font-mono font-bold ${
+                                  isProfit ? "text-green-500" : "text-red-500"
+                                }`}
                               >
                                 {isProfit ? "+" : ""}
                                 {priceChange.toFixed(2)}%
@@ -319,14 +301,10 @@ console.log(tweetMarkers,'tweetMarkers');
                 }}
               >
                 <NextLink href={`/detail/${marker.data.screen_name}`}>
-                  <ImageError url={marker.data.profile_image_url} alt={marker.data.user}></ImageError>
-                  {/* <Image
-                    src={marker.data.profile_image_url}
+                  <ImageError
+                    url={marker.data.profile_image_url}
                     alt={marker.data.user}
-                    width={32}
-                    height={32}
-                    className="rounded-full border-2 border-white hover:border-blue-500 transition-all"
-                  /> */}
+                  ></ImageError>
                 </NextLink>
               </div>
             </Tooltip>
