@@ -13,6 +13,7 @@ import {
 import { Tooltip, Avatar, AvatarGroup } from "@nextui-org/react";
 import { Tweet, PriceHistory } from "@/types";
 import NextLink from "next/link";
+import { FaTwitter } from "react-icons/fa";
 
 type FollowerRange = "0-5k" | "5k-10k" | "10k-50k" | "50k+";
 
@@ -128,13 +129,22 @@ const CustomDot = ({
                         </NextLink>
                       </div>
                     </div>
-                    <NextLink
-                      href={`https://twitter.com/intent/follow?screen_name=${tweet.screen_name}`}
-                      target="_blank"
-                      className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors"
-                    >
-                      Follow
-                    </NextLink>
+                    <div className="flex items-center gap-2">
+                      <NextLink
+                        href={`/detail/${tweet.screen_name}`}
+                        className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-colors"
+                      >
+                        Profile
+                      </NextLink>
+                      <NextLink
+                        href={`https://twitter.com/intent/follow?screen_name=${tweet.screen_name}`}
+                        target="_blank"
+                        className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors flex items-center gap-1"
+                      >
+                        <FaTwitter className="text-xs" />
+                        Follow
+                      </NextLink>
+                    </div>
                   </div>
 
                   <div className="mt-2 space-y-1">
