@@ -161,7 +161,9 @@ const CustomDot = ({
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">Return After Tweet</span>
+                          <span className="text-gray-400">
+                            Return After Tweet
+                          </span>
                           <span
                             className={`font-mono font-bold ${
                               impact.priceChange >= 0
@@ -345,7 +347,7 @@ export default function TokenChart({
 
       <div className="relative h-[600px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={processedChartData} >
+          <AreaChart data={processedChartData}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
