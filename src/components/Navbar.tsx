@@ -77,13 +77,13 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
           )}
           {!isNotLoggedIn && (
             <div className="flex items-center gap-4">
-              <Button
+              {/* <Button
                 radius="none"
                 className="bg-black text-white border-1 border-white"
                 onPress={() => router.push("/profile")}
               >
                 profile
-              </Button>
+              </Button> */}
 
               {/* Wallet Info */}
               <div className="hidden md:flex flex-col items-end text-sm">

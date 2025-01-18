@@ -58,7 +58,7 @@ export default function TokenPage() {
             tweets: tweetsRes.tweets,     // 根据接口返回的结构调整
           });
         } catch(error) {
-          toast.error(error instanceof Error ? error.message : "error");
+          // toast.error(error instanceof Error ? error.message : "error");
         }
       }
     }

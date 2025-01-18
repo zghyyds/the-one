@@ -161,7 +161,7 @@ const CustomDot = ({
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">Impact</span>
+                          <span className="text-gray-400">Return After Tweet</span>
                           <span
                             className={`font-mono font-bold ${
                               impact.priceChange >= 0

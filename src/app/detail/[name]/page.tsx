@@ -13,6 +13,7 @@ import { Avatar, Divider } from "@nextui-org/react";
 import { Image } from "@nextui-org/image";
 import toast from "react-hot-toast";
 import ReactECharts from "echarts-for-react";
+import type { ECElementEvent } from 'echarts';
 import {
   getFollowNum,
   getFollowList,
@@ -20,7 +21,7 @@ import {
   getTickerOne,
 } from "@/api";
 
-import { useEffect, useMemo, useState,Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense,useRef } from "react";
 import { useParams } from 'next/navigation'
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
@@ -28,6 +29,7 @@ import Loading from "@/components/Loading";
 import { getColorByIndex, processHistory, mergeData } from "@/util";
 import { Params, Follower, FollowTokens, ChartData, KolDetail } from "@/types";
 import NextLink from "next/link";
+import { useRouter } from 'next/navigation';
 
 export default function Detail() {
   const [followerList, setFollowerList] = useState<Follower[] | undefined>();
@@ -44,7 +46,9 @@ export default function Detail() {
   const [loading, setLoading] = useState(false)
   const [loadship, setLoadShip] = useState(false)
   // const [KolDetail, setKolDetail] = useState<KolDetail>()
-  const [tweetsList,setTweetsList] = useState<KolDetail[]>()
+  const [tweetsList, setTweetsList] = useState<KolDetail[]>()
+  const chartRef = useRef<ReactECharts | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     getFollow();
@@ -57,7 +61,7 @@ export default function Detail() {
       const res = await getFollowNum(params.name);
       setFollowerList(res["following data"]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "error");
+      // toast.error(error instanceof Error ? error.message : "error");
     }
   };
 
@@ -69,7 +73,7 @@ export default function Detail() {
       setXList(res.tweets.map((time) => time.pair_name_1));
       fetchAllTokens(res.tweets);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "error");
+      // toast.error(error instanceof Error ? error.message : "error");
     } finally {
       setLoading(false);
     }
@@ -82,7 +86,7 @@ export default function Detail() {
           try {
             return await getTickerOne(token.pair_name_1);
           } catch (error) {
-            toast.error(error instanceof Error ? error.message : "error");
+            // toast.error(error instanceof Error ? error.message : "error");
             return null;
           }
         })
@@ -142,7 +146,7 @@ export default function Detail() {
         links: formattedLinks,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "error");
+      // toast.error(error instanceof Error ? error.message : "error");
     } finally {
       setLoadShip(false);
     }
@@ -152,19 +156,19 @@ export default function Detail() {
   //   if(tweetsList?.length){
   //     const _data = tweetsList.filter(v => v.Following === params.name)[0] ?? {}
   //     console.log(_data);
-      
+
   //     setKolDetail(_data)
   //   }
   // },[tweetsList])
 
-  const KolDetail = useMemo(()=>{
-    if(tweetsList?.length){
-       return tweetsList.filter(v => v.Following === params.name)[0] ?? {}
-    }else{
-       return {
-        profile_image_url:"",
-        user:""
-       }
+  const KolDetail = useMemo(() => {
+    if (tweetsList?.length) {
+      return tweetsList.filter(v => v.Following === params.name)[0] ?? {}
+    } else {
+      return {
+        profile_image_url: "",
+        user: ""
+      }
     }
   }, [tweetsList]);
 
@@ -205,15 +209,60 @@ export default function Detail() {
         },
       ],
     });
+
+    // chartInstance.on('click', { dataType: 'node' }, function (params) {
+    //   console.log('Node clicked:', params.data);
+    // });
+
+    // // Click event for edges
+    // chartInstance.on('click', { dataType: 'edge' }, function (params) {
+    //   console.log('Edge clicked:', params.data);
+    // });
   }, [graphData]);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const chartInstance = chartRef.current.getEchartsInstance();
+    
+    const onChartClick = (params: ECElementEvent) => {
+      if (params.dataType === 'node') {
+        const nodeData = params.data as { name: string }
+        const userName = nodeData.name.replace(/\d+$/, '');
+        
+        // 使用立即执行的异步函数来处理异步操作
+        (async () => {
+          try {
+            const res = await getFollowList(params.name);
+            if (res.tweets.length > 0) {
+              router.push(`/detail/${userName}`);
+            } else {
+              window.open(`https://x.com/${userName}`, '_blank');
+            }
+          } catch (error) {
+            window.open(`https://x.com/${userName}`, '_blank');    
+          }
+        })();
+      }
+    };
+  
+    chartInstance.on('click', onChartClick);
+    
+    // 清理函数
+    return () => {
+      chartInstance.off('click', onChartClick);
+    };
+  }, [chartRef.current]);
+
+  useEffect(()=>{
+    console.log(chartRef.current,'chartRef.current');
+    
+  },[chartRef.current])
 
 
   return <div className="flex flex-col gap-4">
     <div className="flex justify-between items-center mb-3">
       <div className="flex items-center gap-2">
-        <Suspense fallback={<Loading />}>
-          {KolDetail?.profile_image_url&&<Avatar size="lg" src={KolDetail?.profile_image_url}  ></Avatar>}
-        </Suspense>
+        {KolDetail?.profile_image_url && <Avatar size="lg" src={KolDetail?.profile_image_url}></Avatar>}
         {/* <Image src={KolDetail?.profile_image_url}  ></Image> */}
         <div className="flex flex-col">
           <div className="flex gap-2">
@@ -227,103 +276,103 @@ export default function Detail() {
         <span className="text-[#8181E5] text-2xl pr-1 ">67,899</span>
         <span>smart followers</span>
       </div> */}
-      </div>
-      <Divider></Divider>
-      <div className="flex gap-4 " style={{ height: "750px" }}>
-        <div style={{ width: "60%" }} className="flex flex-col gap-4 h-full">
-          <Card
-            className="flex flex-col bg-[#1f1b23] p-2 px-4"
-            style={{ backgroundColor: "#1f1b23E1" }}
-          >
-            <CardBody className="overflow-x-auto p-2">
-              <span className="font-bold">Token</span>
-              <div className="flex gap-3">
-                {followTokens?.map((token, index) => (
-                  <NextLink
-                    href={`/token/${token.pair_name_1.toLowerCase()}`}
-                    key={index}
-                  >
-                    <Button>{token.pair_name_1}</Button>
-                  </NextLink>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-          <Card
-            className="flex flex-col bg-[#1f1b23] flex-1"
-            style={{ backgroundColor: "#1f1b23E1" }}
-          >
-            <CardBody className="p-4">
-              <span className="font-bold">Price Change</span>
-              {loading ? (
-                <Loading />
-              ) : (
-                <ResponsiveContainer width="100%">
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 15, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <Legend />
-                    {Xlist?.map((v, index) => {
-                      return (
-                        <Line
-                          type="monotone"
-                          dataKey={v}
-                          stroke={getColorByIndex(index)}
-                          dot={false}
-                          key={index}
-                        />
-                      );
-                    })}
-                    <XAxis
-                      dataKey="download_time"
-                      stroke="#8c8c8c"
-                      tick={{ fill: "#8c8c8c" }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      stroke="#8c8c8c"
-                      tick={{ fill: "#8c8c8c" }}
-                      tickLine={false}
-                      tickFormatter={(value) => `${value}%`} // 格式化为百分比
-                    />
-                    {/* <Tooltip contentStyle={{
+    </div>
+    <Divider></Divider>
+    <div className="flex gap-4 " style={{ height: "750px" }}>
+      <div style={{ width: "60%" }} className="flex flex-col gap-4 h-full">
+        <Card
+          className="flex flex-col bg-[#1f1b23] p-2 px-4"
+          style={{ backgroundColor: "#1f1b23E1" }}
+        >
+          <CardBody className="overflow-x-auto p-2">
+            <span className="font-bold">Token</span>
+            <div className="flex gap-3">
+              {followTokens?.map((token, index) => (
+                <NextLink
+                  href={`/token/${token.pair_name_1.toLowerCase()}`}
+                  key={index}
+                >
+                  <Button>{token.pair_name_1}</Button>
+                </NextLink>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+        <Card
+          className="flex flex-col bg-[#1f1b23] flex-1"
+          style={{ backgroundColor: "#1f1b23E1" }}
+        >
+          <CardBody className="p-4">
+            <span className="font-bold">Price Change</span>
+            {loading ? (
+              <Loading />
+            ) : (
+              <ResponsiveContainer width="100%">
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 15, right: 30, left: 20, bottom: 5 }}
+                >
+                  <Legend />
+                  {Xlist?.map((v, index) => {
+                    return (
+                      <Line
+                        type="monotone"
+                        dataKey={v}
+                        stroke={getColorByIndex(index)}
+                        dot={false}
+                        key={index}
+                      />
+                    );
+                  })}
+                  <XAxis
+                    dataKey="download_time"
+                    stroke="#8c8c8c"
+                    tick={{ fill: "#8c8c8c" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="#8c8c8c"
+                    tick={{ fill: "#8c8c8c" }}
+                    tickLine={false}
+                    tickFormatter={(value) => `${value}%`} // 格式化为百分比
+                  />
+                  {/* <Tooltip contentStyle={{
                     backgroundColor: "#312d4c",
                     border: "1px solid #333",
                     borderRadius: "8px",
                     color: "#fff",
                   }} /> */}
 
-                    <Tooltip content={<CustomTooltip />} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </CardBody>
-          </Card>
-        </div>
-        <Card style={{ width: "40%", backgroundColor: "#1f1b23E1" }}>
-          <CardBody className="p-4">
-            <div className="flex justify-between mb-2">
-              <div className="flex flex-col gap-1">
-                <span className="font-bold">Followers</span>
-                <span className="text-xl text-customblue">
-                  {followerList?.[0].common_count ?? 0}
-                </span>
-                {/* <div>
+                  <Tooltip content={<CustomTooltip />} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </CardBody>
+        </Card>
+      </div>
+      <Card style={{ width: "40%", backgroundColor: "#1f1b23E1" }}>
+        <CardBody className="p-4">
+          <div className="flex justify-between mb-2">
+            <div className="flex flex-col gap-1">
+              <span className="font-bold">Followers</span>
+              <span className="text-xl text-customblue">
+                {followerList?.[0].total_count ?? 0}
+              </span>
+              {/* <div>
               <span className="text-xs">Highest rank</span>
               <div>
                 <span className="text-xl text-[#8181E5]">7,765</span>
                 <span className="text-xs">(Today)</span>
               </div>
             </div> */}
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold">Kol Followers</span>
-                <span className="text-xl text-[#8181E5]">
-                  {followerList?.[0].total_count ?? 0}
-                </span>
-              </div>
-              {/* <div className="" style={{ height: "86px", width: "220px" }}>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="font-bold">Kol Followers</span>
+              <span className="text-xl text-[#8181E5]">
+                {followerList?.[0].common_count ?? 0}
+              </span>
+            </div>
+            {/* <div className="" style={{ height: "86px", width: "220px" }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 width={200}
@@ -346,38 +395,39 @@ export default function Detail() {
               </AreaChart>
             </ResponsiveContainer>
           </div> */}
-            </div>
-            <Divider></Divider>
-            <div
-              className="w-full flex-1"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%", // 父容器宽度
-              }}
-            >
-              {/* 
+          </div>
+          <Divider></Divider>
+          <div
+            className="w-full flex-1"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%", // 父容器宽度
+            }}
+          >
+            {/* 
           <Graph
             id="relationship-graph" // 必须是唯一值
             data={graphData}
             config={graphConfig}
             onMouseOverNode={onMouseOverNode}
           /> */}
-              {loadship ? (
-                <Loading />
-              ) : (
-                <ReactECharts
-                  option={option}
-                  style={{ height: "100%", width: "100%" }}
-                />
-              )}
-            </div>
-          </CardBody>
-        </Card>
-      </div>
+            {loadship ? (
+              <Loading />
+            ) : (
+              <ReactECharts
+                ref={chartRef}
+                option={option}
+                style={{ height: "100%", width: "100%" }}
+              />
+            )}
+          </div>
+        </CardBody>
+      </Card>
     </div>
-  );
+  </div>
+
 }
 
 const CustomTooltip = ({ payload, label }: any) => {
