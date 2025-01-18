@@ -52,12 +52,12 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
             )}
             href="/"
           >
-            <Image 
-             src={"/logo.svg"}
-             width={36}
-             height={36}
-             alt=""
-            >  
+            <Image
+              src={"/logo.svg"}
+              width={36}
+              height={36}
+              alt=""
+            >
             </Image>
           </NextLink>
         </NavbarBrand>
@@ -65,6 +65,20 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
 
       <NavbarContent className="md:pl-4" justify="end">
         <div className="flex items-center space-x-2 sm:space-x-6">
+          <Button
+            radius="full"
+            className="bg-transparent text-[#8181E5] border-[#8181E5] border"
+            onPress={() =>  window.open(`https://x.com/the1aiagent`, '_blank')}
+          >
+            <Image src={"/tweet.png"} alt="" width={20} height={20}></Image>
+          </Button>
+          <Button
+            radius="full"
+            className="bg-transparent text-[#8181E5] border-[#8181E5] border"
+            onPress={() => window.open(`https://dexscreener.com/solana/FfQ99V4Z74397VZBxz2iPfnZMWGeuobdWXpTfcHjuYno`, '_blank')}
+          >
+            <Image src={"/dexscreener.png"} alt="" width={20} height={20}></Image>
+          </Button>
           {isNotLoggedIn && (
             <Button
               radius="full"
@@ -75,6 +89,7 @@ export const Navbar = ({ boxClassName }: { boxClassName: string }) => {
               Login
             </Button>
           )}
+
           {!isNotLoggedIn && (
             <div className="flex items-center gap-4">
               {/* <Button
