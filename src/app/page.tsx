@@ -3,14 +3,15 @@ import Image from "next/image";
 // import { ReactIcon } from '@/components/icon';
 // import { Button } from "@nextui-org/button";
 // import { BiSearch } from "react-icons/bi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getTickers, getKols } from "@/api";
 import NextLink from "next/link";
 import { Divider } from "@nextui-org/react";
 import useDebounce from "@/hooks/useDebounce";
 import Loading from "@/components/Loading";
-import { shortenAddress } from "@/util/formatter";
-import { TokenList } from "@/types";
+import { shortenAddress } from "@/util/formatter"
+import { TokenList } from "@/types"
+import toast from "react-hot-toast";
 
 export default function Home() {
   const [kolsList, setKolsList] = useState<string[]>([]);
@@ -23,50 +24,48 @@ export default function Home() {
 
   useEffect(() => {
     // 从缓存中读取数据
-    const cachedKols = localStorage.getItem("kolsList");
+    const cachedKols = localStorage.getItem("kolsList")
     const cachedTicks = localStorage.getItem("tokenList");
 
-    if (cachedKols && cachedTicks) {
+    if (cachedKols?.length && cachedTicks?.length) {
       // 如果缓存中有数据，直接设置
       setKolsList(JSON.parse(cachedKols));
       setTokenList(JSON.parse(cachedTicks));
+      if (searchText) {
+        setLoading(true)
+        checkfilter(searchText, kolsList, tokenList)
+      }
     } else {
-      // 否则调用 API 获取数据
+      setLoading(true)
       const getTickersApi = async () => {
         const [kols, ticks] = await Promise.all([getKols(), getTickers()]);
         setKolsList(kols.tickers);
 
-        const filterList = Array.from(
-          new Map(
-            ticks.tickers.map(([name, address, num]) => [
-              address,
-              { name, address, num },
-            ])
-          ).values()
-        );
-
-        setTokenList(filterList);
+        const filterList = Array.from(new Map(ticks.tickers.map(([name, address, num]) => [address, { name, address, num }])).values())
+        setTokenList(filterList)
+        if (searchText) {
+          checkfilter(searchText, kols.tickers, filterList)
+        }
         // 缓存到 localStorage
         localStorage.setItem("kolsList", JSON.stringify(kols.tickers));
         localStorage.setItem("tokenList", JSON.stringify(filterList));
-      };
+      }
       getTickersApi();
     }
-  }, []);
+  }, [searchText])
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
   };
 
-  const checkfilter = useDebounce((text) => {
-    setLoading(true);
-
-    const kolsFiltered = kolsList.filter((item) =>
+  const checkfilter = useDebounce((text, kolList: string[], TokenList: TokenList[]) => {
+    console.log(kolList, TokenList)
+    const kolsFiltered = kolList.filter((item) =>
       item.toLowerCase().includes(text.toLowerCase())
     );
-
-    const tokenFiltered = tokenList.filter((item) =>
+    const tokenFiltered = TokenList.filter((item) =>
       item.name.toLowerCase().includes(text.toLowerCase())
     );
     setTimeout(() => {
@@ -74,11 +73,10 @@ export default function Home() {
       setFilteredKols(kolsFiltered);
       setFilteredTokens(tokenFiltered);
     }, 1000);
-  }, 1000);
-
-  useEffect(() => {
-    checkfilter(searchText);
-  }, [searchText]);
+  }, 1000)
+  // useEffect(() => {
+  //   checkfilter(searchText)
+  // }, [searchText])
 
   return (
     <div
@@ -87,6 +85,7 @@ export default function Home() {
         height: "600px",
         backgroundImage: "url('/bg.png')",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         justifyContent: "center",
         alignItems: "center",
         flex: 1,
@@ -138,9 +137,7 @@ export default function Home() {
                               <div className="flex gap-2 items-center">
                                 {/* <Image src={"/token.svg"} width={28} height={28} alt=""></Image> */}
                                 <span className="font-bold">{item.name}</span>
-                                <span className="text-xs text-zinc-400 opacity-2">
-                                  {shortenAddress(item.address)}
-                                </span>
+                                <span className="text-xs text-zinc-400 opacity-2">{shortenAddress(item.address)}</span>
                               </div>
                             </NextLink>
                           );

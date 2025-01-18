@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -345,7 +345,7 @@ export default function TokenChart({
 
       <div className="relative h-[600px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={processedChartData}>
+          <AreaChart data={processedChartData} >
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />

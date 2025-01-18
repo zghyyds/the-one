@@ -23,7 +23,7 @@ export default function RootLayout({
               {/* Scrollable content */}
               <div className="relative z-10 flex flex-col flex-1">
                 <Navbar boxClassName="w-full px-2 md:px-5 mx-auto" />
-                <main className="flex-1 w-full mx-auto px-2 md:px-5 pb-8">
+                <main className="flex-1 w-full mx-auto px-2 md:px-5 pb-8 max-w-[1560px]">
                   {children}
                 </main>
                 {/* <Footer /> */}

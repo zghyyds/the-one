@@ -20,8 +20,8 @@ import {
   getTickerOne,
 } from "@/api";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState,Suspense } from "react";
+import { useParams } from 'next/navigation'
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
 import Loading from "@/components/Loading";
@@ -39,12 +39,12 @@ export default function Detail() {
     data: [],
     links: [],
   });
-  const [chartData, setChartData] = useState<ChartData[]>();
-  const [Xlist, setXList] = useState<string[]>();
-  const [loading, setLoading] = useState(false);
-  const [loadship, setLoadShip] = useState(false);
-  const [KolDetail, setKolDetail] = useState<KolDetail>();
-  const [tweetsList, setTweetsList] = useState<KolDetail[]>();
+  const [chartData, setChartData] = useState<ChartData[]>()
+  const [Xlist, setXList] = useState<string[]>()
+  const [loading, setLoading] = useState(false)
+  const [loadship, setLoadShip] = useState(false)
+  // const [KolDetail, setKolDetail] = useState<KolDetail>()
+  const [tweetsList,setTweetsList] = useState<KolDetail[]>()
 
   useEffect(() => {
     getFollow();
@@ -148,13 +148,23 @@ export default function Detail() {
     }
   };
 
-  useEffect(() => {
-    if (tweetsList?.length) {
-      const _data =
-        tweetsList.filter((v) => v.Following === params.name)[0] ?? {};
-      console.log(_data);
+  // useEffect(()=>{
+  //   if(tweetsList?.length){
+  //     const _data = tweetsList.filter(v => v.Following === params.name)[0] ?? {}
+  //     console.log(_data);
+      
+  //     setKolDetail(_data)
+  //   }
+  // },[tweetsList])
 
-      setKolDetail(_data);
+  const KolDetail = useMemo(()=>{
+    if(tweetsList?.length){
+       return tweetsList.filter(v => v.Following === params.name)[0] ?? {}
+    }else{
+       return {
+        profile_image_url:"",
+        user:""
+       }
     }
   }, [tweetsList]);
 
@@ -197,21 +207,23 @@ export default function Detail() {
     });
   }, [graphData]);
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <Avatar size="lg" src={KolDetail?.profile_image_url}></Avatar>
-          {/* <Image src={KolDetail?.profile_image_url}  ></Image> */}
-          <div className="flex flex-col">
-            <div className="flex gap-2">
-              <span className="font-bold">{KolDetail?.user}</span>
-              {/* <Chip radius="sm" size="sm" style={{ backgroundColor: "#7574CB" }}>relevant tag</Chip> */}
-            </div>
-            <span className="text-sm">@{params.name}</span>
+
+  return <div className="flex flex-col gap-4">
+    <div className="flex justify-between items-center mb-3">
+      <div className="flex items-center gap-2">
+        <Suspense fallback={<Loading />}>
+          {KolDetail?.profile_image_url&&<Avatar size="lg" src={KolDetail?.profile_image_url}  ></Avatar>}
+        </Suspense>
+        {/* <Image src={KolDetail?.profile_image_url}  ></Image> */}
+        <div className="flex flex-col">
+          <div className="flex gap-2">
+            <span className="font-bold">{KolDetail?.user}</span>
+            {/* <Chip radius="sm" size="sm" style={{ backgroundColor: "#7574CB" }}>relevant tag</Chip> */}
           </div>
+          <span className="text-sm">@{params.name}</span>
         </div>
-        {/* <div>
+      </div>
+      {/* <div>
         <span className="text-[#8181E5] text-2xl pr-1 ">67,899</span>
         <span>smart followers</span>
       </div> */}
