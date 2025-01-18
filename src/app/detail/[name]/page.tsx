@@ -101,8 +101,12 @@ export default function Detail() {
         )[0]?.first_created_at;
         return processHistory(item.history, filterTime);
       });
+      console.log(list);
+      
 
       const merged = mergeData(list);
+      console.log(merged);
+      
       setChartData(merged);
     }
   };
@@ -322,13 +326,15 @@ export default function Detail() {
                         dot={false}
                         key={index}
                       />
-                    );
+                    )
                   })}
                   <XAxis
-                    dataKey="download_time"
+                    // dataKey="x"
                     stroke="#8c8c8c"
                     tick={{ fill: "#8c8c8c" }}
                     tickLine={false}
+                    interval={3} 
+                    tickFormatter={(value) => `${value}h`} // 格式化为百分比
                   />
                   <YAxis
                     stroke="#8c8c8c"
@@ -354,7 +360,7 @@ export default function Detail() {
         <CardBody className="p-4">
           <div className="flex justify-between mb-2">
             <div className="flex flex-col gap-1">
-              <span className="font-bold">Followers</span>
+              <span className="font-bold">Key Following</span>
               <span className="text-xl text-customblue">
                 {followerList?.[0].total_count ?? 0}
               </span>
@@ -367,7 +373,7 @@ export default function Detail() {
             </div> */}
             </div>
             <div className="flex flex-col gap-1">
-              <span className="font-bold">Kol Followers</span>
+              <span className="font-bold">Key KOL Following</span>
               <span className="text-xl text-[#8181E5]">
                 {followerList?.[0].common_count ?? 0}
               </span>

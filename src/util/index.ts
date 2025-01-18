@@ -42,34 +42,40 @@ export const processHistory = (
     .map((value) => ({
       [value.name]: value.close,
     }));
-
+    
   // 获取最后一个有效项的 close 值
-  const lastValidClose =
-    filteredHistory.length > 0
-      ? parseFloat(Object.values(filteredHistory[filteredHistory.length - 1])[0] as string)
-      : 0;
-
-  // 自动补全不足 5 项
-  const completedHistory = [...filteredHistory];
-  while (completedHistory.length < 5) {
-    completedHistory.push({
-      [filteredHistory[filteredHistory.length - 1]?.name || "unknown"]: lastValidClose.toString(),
-    });
-  }
-  
-  // 计算增长率
-  return completedHistory.slice(0, 5).map((current, index, arr) => {
+  const lastValidItem = history[history.length - 1];
+  // 先计算增长率
+  const growthRates = filteredHistory.map((current, index, arr) => {
     const previous = arr[index - 1];
     const key = Object.keys(current)[0];
     const currentValue = parseFloat(Object.values(current)[0] as string);
     const previousValue = previous ? parseFloat(Object.values(previous)[0] as string) : currentValue;
 
-    const growthRate = previous ? ((currentValue - previousValue) / previousValue) * 100 : 0;
+    const growthRate = index === 0 ? 0 : ((currentValue - previousValue) / previousValue) * 100;
      
     return {
       [key]: parseFloat(growthRate.toFixed(2)),
+      x: index
     };
   });
+
+  // 获取最后一个增长率
+  const lastGrowthRate = growthRates.length > 0
+    ? growthRates[growthRates.length - 1][Object.keys(growthRates[growthRates.length - 1])[0]]
+    : 0;
+
+  // 补充不足120项
+  const completedGrowthRates = [...growthRates];
+  while (completedGrowthRates.length < 120) {
+    const nextIndex = completedGrowthRates.length;
+    completedGrowthRates.push({
+      [lastValidItem.name]: lastGrowthRate,
+      x: nextIndex
+    });
+  }
+
+  return completedGrowthRates.slice(0, 120);
 };
 
 
@@ -77,7 +83,7 @@ export const processHistory = (
 // 动态合并不同数组的相同索引项
 export const mergeData = (dataList: Record<string, number>[][]): Record<string, number>[] => {
   return dataList[0].map((_, index) => {
-    const mergedEntry: Record<string, number> = {};
+    const mergedEntry: Record<string, number> = { x: index }; // 添加 x 坐标
     dataList.forEach((subList) => {
       const entry = Object.entries(subList[index])[0]; // 获取当前索引的键值对
       mergedEntry[entry[0]] = entry[1]; // 动态添加到结果对象中

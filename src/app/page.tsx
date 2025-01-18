@@ -55,6 +55,9 @@ export default function Home() {
   }, [searchText])
 
 
+
+
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);

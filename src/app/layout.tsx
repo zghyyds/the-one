@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { Providers } from "./providers";
 import { Toaster } from 'react-hot-toast';
 import { Web3Provider } from "@/providers/Web3Provider";
+import CacheUpdater from "@/components/CacheUpdate";
 
 export default function RootLayout({
   children,
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-screen font-manrope text-white antialiased">
         <Web3Provider>
           <Providers attribute="class" defaultTheme="dark">
+            <CacheUpdater />
             <Toaster/>
             <div className="relative min-h-screen flex flex-col">
               {/* Scrollable content */}
