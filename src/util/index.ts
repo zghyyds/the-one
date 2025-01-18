@@ -42,17 +42,17 @@ export const processHistory = (
     .map((value) => ({
       [value.name]: value.close,
     }));
+    console.log(filteredHistory);
     
   // 获取最后一个有效项的 close 值
-  const lastValidItem = history[history.length - 1];
-  // 先计算增长率
-  const growthRates = filteredHistory.map((current, index, arr) => {
-    const previous = arr[index - 1];
+  const firstItem = filteredHistory[0];
+  const baseValue = firstItem ? parseFloat(Object.values(firstItem)[0] as string) : 0;
+
+  // 计算相对于第一个值的增长率
+  const growthRates = filteredHistory.map((current, index) => {
     const key = Object.keys(current)[0];
     const currentValue = parseFloat(Object.values(current)[0] as string);
-    const previousValue = previous ? parseFloat(Object.values(previous)[0] as string) : currentValue;
-
-    const growthRate = index === 0 ? 0 : ((currentValue - previousValue) / previousValue) * 100;
+    const growthRate = ((currentValue - baseValue) / baseValue) * 100;
      
     return {
       [key]: parseFloat(growthRate.toFixed(2)),
@@ -67,6 +67,7 @@ export const processHistory = (
 
   // 补充不足120项
   const completedGrowthRates = [...growthRates];
+  const lastValidItem = history[0]; // 获取第一个历史记录项作为有效项
   while (completedGrowthRates.length < 120) {
     const nextIndex = completedGrowthRates.length;
     completedGrowthRates.push({
