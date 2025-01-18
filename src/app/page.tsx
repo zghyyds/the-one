@@ -70,7 +70,8 @@ export default function Home() {
       item.toLowerCase().includes(text.toLowerCase())
     );
     const tokenFiltered = TokenList.filter((item) =>
-      item.name.toLowerCase().includes(text.toLowerCase())
+      item.name.toLowerCase().includes(text.toLowerCase()) || 
+      item.address.toLowerCase().includes(text.toLowerCase())
     );
 
     const filteredTokensAddress2 =  TokenList.filter((item) =>
@@ -176,7 +177,7 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                  <Divider></Divider>
+                  {/* <Divider></Divider>
                   <div className="flex flex-col gap-4">
                     <span className="text-[#ccc]">Address</span>
                     <div className="flex flex-col gap-2">
@@ -188,9 +189,7 @@ export default function Home() {
                               key={index}
                             >
                               <div className="flex gap-2 items-center">
-                                {/* <Image src={"/token.svg"} width={28} height={28} alt=""></Image> */}
                                 <span className="font-bold">{shortenAddress(item.address)}</span>
-                                {/* <span className="text-xs text-zinc-400 opacity-2">{shortenAddress(item.address)}</span> */}
                               </div>
                             </NextLink>
                           );
@@ -199,7 +198,7 @@ export default function Home() {
                         <div>No results found in Kols</div>
                       )}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
                 
               )}
