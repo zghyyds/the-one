@@ -9,6 +9,7 @@ function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: num
         clearTimeout(timer.current);
       }
     };
+    
   }, []);
 
   const debouncedFunction = (...args: Parameters<T>) => {
