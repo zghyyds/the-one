@@ -333,8 +333,8 @@ export default function Detail() {
                     stroke="#8c8c8c"
                     tick={{ fill: "#8c8c8c" }}
                     tickLine={false}
-                    interval={3} 
-                    tickFormatter={(value) => `${value}h`} // 格式化为百分比
+                    interval={6} 
+                    tickFormatter={(value) => `${value+1}h`} // 格式化为百分比
                   />
                   <YAxis
                     stroke="#8c8c8c"

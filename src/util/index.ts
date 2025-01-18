@@ -83,10 +83,10 @@ export const processHistory = (
 // 动态合并不同数组的相同索引项
 export const mergeData = (dataList: Record<string, number>[][]): Record<string, number>[] => {
   return dataList[0].map((_, index) => {
-    const mergedEntry: Record<string, number> = { x: index }; // 添加 x 坐标
+    const mergedEntry: Record<string, number> = { x: index  }; // 修改 x 坐标从1开始
     dataList.forEach((subList) => {
-      const entry = Object.entries(subList[index])[0]; // 获取当前索引的键值对
-      mergedEntry[entry[0]] = entry[1]; // 动态添加到结果对象中
+      const entry = Object.entries(subList[index])[0];
+      mergedEntry[entry[0]] = entry[1];
     });
     return mergedEntry;
   });
